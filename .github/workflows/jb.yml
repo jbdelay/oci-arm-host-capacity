@@ -1,0 +1,41 @@
+name: Oracle Cloud ARM Provisioning
+
+on:
+  workflow_dispatch: # Permet de lancer manuellement
+  schedule:
+    - cron: '*/15 * * * *' # Essaie toutes les 15 minutes automatiquement
+
+jobs:
+  launch-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install OCI CLI
+        run: |
+          bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
+          echo "/home/runner/bin" >> $GITHUB_PATH
+
+      - name: Configure OCI CLI
+        run: |
+          mkdir -p ~/.oci
+          echo "[DEFAULT]" > ~/.oci/config
+          echo "user=${{ secrets.OCI_USER_OCID }}" >> ~/.oci/config
+          echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> ~/.oci/config
+          echo "tenancy=${{ secrets.OCI_TENANCY_OCID }}" >> ~/.oci/config
+          echo "region=${{ secrets.OCI_REGION }}" >> ~/.oci/config
+          echo "key_file=~/.oci/oci_api_key.pem" >> ~/.oci/config
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/config/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+
+      - name: Attempt to Launch Instance
+        run: |
+          oci compute instance launch \
+            --availability-domain "oiIp:EU-FRANKFURT-1-AD-1" \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
+            --shape "VM.Standard.A1.Flex" \
+            --shape-config '{"ocpus": 4, "memoryInGB": 24}' \
+            --assign-public-ip true \
+            --display-name "Dokploy-Server" \
+            --image-id "${{ secrets.OCI_IMAGE_OCID }}" \
+            --subnet-id "${{ secrets.OCI_SUBNET_OCID }}" \
+            --ssh-authorized-keys-file <(echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}") \
+            --boot-volume-size-in-gbs 100
