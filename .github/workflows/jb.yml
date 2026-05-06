@@ -34,7 +34,7 @@ jobs:
       - name: Attempt to Launch Instance
         run: |
           oci compute instance launch \
-            --availability-domain "oiIp:EU-FRANKFURT-1-AD-1" \
+            --availability-domain "oiIp:EU-FRANKFURT-1-AD-3" \
             --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
             --shape "VM.Standard.A1.Flex" \
             --shape-config '{"ocpus": 4, "memoryInGB": 24}' \
