@@ -3,7 +3,7 @@ name: Oracle Cloud ARM Provisioning
 on:
   workflow_dispatch: # Permet de lancer manuellement
   schedule:
-    - cron: '*/15 * * * *' # Essaie toutes les 15 minutes automatiquement
+    - cron: '*/5 * * * *' # Essaie toutes les 15 minutes automatiquement
 
 jobs:
   launch-instance:
